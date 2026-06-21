@@ -11,3 +11,4 @@ backend/.venv/
 *.egg-info/
 dist/
 .vercel/
+scratch/
