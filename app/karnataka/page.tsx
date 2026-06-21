@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps';
+import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from 'react-simple-maps';
 import GlassPanel from '@/components/GlassPanel';
 import OrbitalRing from '@/components/OrbitalRing';
 import WhatIfSimulator from '@/components/WhatIfSimulator';
@@ -19,6 +19,14 @@ export default function KarnatakaPage() {
   const [simLoaded, setSimLoaded] = useState(false);
   const [simBaseline, setSimBaseline] = useState(karnatakaDistricts[4]); // Belagavi default
   const [incidentOverrides, setIncidentOverrides] = useState<Parameters<typeof computeWhatIf>[1] | null>(null);
+  const [hoveredDistrict, setHoveredDistrict] = useState<{
+    x: number;
+    y: number;
+    name: string;
+    score: number;
+    band: string;
+    color: string;
+  } | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => setReady(true), 200);
@@ -32,13 +40,9 @@ export default function KarnatakaPage() {
   }, []);
 
   const getDistrict = (geoProps: Record<string, string>) => {
-    const name = (geoProps.DISTRICT || geoProps.NAME_2 || geoProps.name || '').toLowerCase();
-    for (const key of Object.keys(districtMap)) {
-      if (name.includes(key.split(' ')[0].toLowerCase()) || key.includes(name.split(' ')[0])) {
-        return districtMap[key];
-      }
-    }
-    return null;
+    let name = (geoProps.district || geoProps.DISTRICT || geoProps.NAME_2 || geoProps.name || '').trim().toLowerCase();
+    if (name === 'bagalkote') name = 'bagalkot';
+    return districtMap[name] || null;
   };
 
   const getStateForDistrict = (d: typeof karnatakaDistricts[0]) => {
@@ -141,54 +145,73 @@ export default function KarnatakaPage() {
               <div className="h-[480px] relative">
                 <ComposableMap
                   projection="geoMercator"
-                  projectionConfig={{ center: [76.2, 15.3], scale: 3800 }}
+                  projectionConfig={{ center: [76.15, 14.85], scale: 4200 }}
                   style={{ width: '100%', height: '100%', background: '#0A0E1A' }}
                 >
-                  <Geographies geography={KARNATAKA_GEO}>
-                    {({ geographies }: { geographies: any[] }) =>
-                      geographies.map((geo: any) => {
-                        const d = getDistrict(geo.properties);
-                        const state = d ? getStateForDistrict(d) : null;
-                        const score = state?.stabilityScore;
-                        const isSelected = selectedDistrict?.name === d?.name;
+                  <ZoomableGroup center={[76.15, 14.85]} zoom={1} minZoom={0.8} maxZoom={5}>
+                    <Geographies geography={KARNATAKA_GEO}>
+                      {({ geographies }: { geographies: any[] }) =>
+                        geographies.map((geo: any) => {
+                          const d = getDistrict(geo.properties);
+                          const state = d ? getStateForDistrict(d) : null;
+                          const score = state?.stabilityScore;
+                          const isSelected = selectedDistrict?.name === d?.name;
 
-                        return (
-                          <Geography
-                            key={geo.rsmKey}
-                            geography={geo}
-                            fill={score !== undefined ? (getScoreBand(score).hex + (isSelected ? 'FF' : 'AA')) : 'rgba(28,35,51,0.8)'}
-                            stroke="rgba(0,229,255,0.2)"
-                            strokeWidth={isSelected ? 2 : 0.5}
-                            style={{
-                              default: { outline: 'none', transition: 'fill 0.2s' },
-                              hover:   { outline: 'none', filter: 'brightness(1.4)', cursor: 'pointer' },
-                              pressed: { outline: 'none' },
-                            }}
-                            onClick={() => d && setSelectedDistrict(d)}
-                          />
-                        );
-                      })
-                    }
-                  </Geographies>
+                          return (
+                            <Geography
+                              key={geo.rsmKey}
+                              geography={geo}
+                              fill={score !== undefined ? (getScoreBand(score).hex + (isSelected ? 'FF' : 'AA')) : 'rgba(28,35,51,0.8)'}
+                              stroke="rgba(0,229,255,0.2)"
+                              strokeWidth={isSelected ? 2 : 0.5}
+                              style={{
+                                default: { outline: 'none', transition: 'fill 0.2s' },
+                                hover:   { outline: 'none', filter: 'brightness(1.4)', cursor: 'pointer' },
+                                pressed: { outline: 'none' },
+                              }}
+                              onMouseEnter={(evt: React.MouseEvent) => {
+                                if (!d || !state) return;
+                                setHoveredDistrict({
+                                  x: evt.clientX,
+                                  y: evt.clientY,
+                                  name: d.name,
+                                  score: state.stabilityScore,
+                                  band: getScoreBand(state.stabilityScore).band,
+                                  color: getScoreBand(state.stabilityScore).hex,
+                                });
+                              }}
+                              onMouseMove={(evt: React.MouseEvent) => {
+                                if (hoveredDistrict) {
+                                  setHoveredDistrict(prev => prev ? { ...prev, x: evt.clientX, y: evt.clientY } : null);
+                                }
+                              }}
+                              onMouseLeave={() => setHoveredDistrict(null)}
+                              onClick={() => d && setSelectedDistrict(d)}
+                            />
+                          );
+                        })
+                      }
+                    </Geographies>
 
-                  {/* Incident pin */}
-                  <Marker coordinates={karnatakaIncident.coordinates}>
-                    <circle r={8} fill="#FF6B35" opacity={0.9} className="animate-pulse" />
-                    <circle r={14} fill="none" stroke="#FF6B35" strokeWidth={1.5} opacity={0.4} />
-                    <text textAnchor="middle" y={-18} fill="white" fontSize={9} fontFamily="Inter">
-                      {karnatakaIncident.location}
-                    </text>
-                  </Marker>
-
-                  {/* Live score pins for key districts */}
-                  {simLoaded && incidentState && (
+                    {/* Incident pin */}
                     <Marker coordinates={karnatakaIncident.coordinates}>
-                      <text textAnchor="middle" y={30} fill={getScoreBand(incidentState.stabilityScore).hex}
-                        fontSize={10} fontFamily="JetBrains Mono" fontWeight="600">
-                        Score: {incidentState.stabilityScore}
+                      <circle r={8} fill="#FF6B35" opacity={0.9} className="animate-pulse" />
+                      <circle r={14} fill="none" stroke="#FF6B35" strokeWidth={1.5} opacity={0.4} />
+                      <text textAnchor="middle" y={-18} fill="white" fontSize={9} fontFamily="Inter">
+                        {karnatakaIncident.location}
                       </text>
                     </Marker>
-                  )}
+
+                    {/* Live score pins for key districts */}
+                    {simLoaded && incidentState && (
+                      <Marker coordinates={karnatakaIncident.coordinates}>
+                        <text textAnchor="middle" y={30} fill={getScoreBand(incidentState.stabilityScore).hex}
+                          fontSize={10} fontFamily="JetBrains Mono" fontWeight="600">
+                          Score: {incidentState.stabilityScore}
+                        </text>
+                      </Marker>
+                    )}
+                  </ZoomableGroup>
                 </ComposableMap>
 
                 {/* Map overlay labels */}
@@ -197,6 +220,30 @@ export default function KarnatakaPage() {
                     <span className="text-[10px] font-mono text-text-dim">Karnataka · {karnatakaDistricts.length} districts</span>
                   </GlassPanel>
                 </div>
+
+                {/* Hovered district tooltip */}
+                {hoveredDistrict && (
+                  <div
+                    className="fixed z-50 pointer-events-none bg-panel-surface/95 backdrop-blur border border-white/10 p-3 rounded-lg shadow-panel animate-fade-in text-xs space-y-1.5"
+                    style={{ left: hoveredDistrict.x + 15, top: hoveredDistrict.y + 15 }}
+                  >
+                    <div className="font-display font-semibold text-white">{hoveredDistrict.name}</div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-text-dim">Score:</span>
+                      <span className="font-mono font-bold" style={{ color: hoveredDistrict.color }}>
+                        {hoveredDistrict.score}
+                      </span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded font-medium"
+                        style={{
+                          backgroundColor: hoveredDistrict.color + '20',
+                          color: hoveredDistrict.color
+                        }}
+                      >
+                        {hoveredDistrict.band}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </GlassPanel>
 
