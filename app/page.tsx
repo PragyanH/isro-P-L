@@ -9,7 +9,7 @@ import WhatIfSimulator from '@/components/WhatIfSimulator';
 import { indiaStateSummaries, karnatakaDistricts } from '@/lib/seedData';
 import { getScoreBand } from '@/lib/climateEngine';
 
-const INDIA_TOPO = 'https://raw.githubusercontent.com/geohacker/india/master/state/india_telengana.geojson';
+const INDIA_TOPO = '/india-states.geojson';
 
 interface TooltipState {
   x: number; y: number;
@@ -31,16 +31,27 @@ export default function HomePage() {
 
   const stateScoreMap = useMemo(() => {
     const m: Record<string, typeof indiaStateSummaries[0]> = {};
+    // GeoJSON → seed data name aliases (older GeoJSON uses legacy names)
+    const ALIASES: Record<string, string> = {
+      'orissa': 'odisha',
+      'uttaranchal': 'uttarakhand',
+      'pondicherry': 'puducherry',
+      'andaman and nicobar': 'andaman and nicobar islands',
+    };
     indiaStateSummaries.forEach(s => {
       m[s.name.toLowerCase()] = s;
       m[s.code.toLowerCase()] = s;
+    });
+    // Add aliases pointing to correct entries
+    Object.entries(ALIASES).forEach(([alias, canonical]) => {
+      if (m[canonical]) m[alias] = m[canonical];
     });
     return m;
   }, []);
 
   const getStateData = (geoProps: Record<string, string>) => {
-    const name = (geoProps.NAME_1 || geoProps.ST_NM || geoProps.name || '').toLowerCase();
-    return stateScoreMap[name] || null;
+    const raw = (geoProps.NAME_1 || geoProps.ST_NM || geoProps.name || '').toLowerCase();
+    return stateScoreMap[raw] || null;
   };
 
   const getColor = (score: number | undefined): string => {

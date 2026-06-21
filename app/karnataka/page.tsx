@@ -10,7 +10,7 @@ import ScoreBreakdown from '@/components/ScoreBreakdown';
 import { karnatakaDistricts, karnatakaIncident } from '@/lib/seedData';
 import { computeWhatIf, defaultOverrides, getScoreBand } from '@/lib/climateEngine';
 
-const KARNATAKA_GEO = 'https://raw.githubusercontent.com/geohacker/india/master/district/karnataka.geojson';
+const KARNATAKA_GEO = '/karnataka-districts.geojson';
 
 export default function KarnatakaPage() {
   const [ready, setReady] = useState(false);
