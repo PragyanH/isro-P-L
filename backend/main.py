@@ -48,7 +48,7 @@ def get_district(name: str):
     """Returns baseline data for a specific Karnataka district."""
     name_lower = name.lower().replace("-", " ")
     for d in KARNATAKA_DISTRICTS:
-        if d["name"].lower() == name_lower:
+        if str(d["name"]).lower() == name_lower:
             return d
     raise HTTPException(status_code=404, detail=f"District '{name}' not found")
 
@@ -63,7 +63,7 @@ def get_india_states():
 def recompute(req: RecomputeRequest):
     """Accepts baseline + overrides, returns full recomputed climate state."""
     baseline = next(
-        (d for d in KARNATAKA_DISTRICTS if d["name"].lower() == req.baseline_name.lower()),
+        (d for d in KARNATAKA_DISTRICTS if str(d["name"]).lower() == req.baseline_name.lower()),
         None,
     )
     if baseline is None:
