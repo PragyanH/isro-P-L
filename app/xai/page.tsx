@@ -87,8 +87,8 @@ export default function XAIPage() {
         <div className="text-[10px] font-mono text-text-dim uppercase tracking-widest mb-1">Section 3 · Explainability</div>
         <h1 className="font-display font-bold text-white text-3xl mb-2">XAI / Methodology</h1>
         <p className="text-text-dim max-w-2xl">
-          How PrithviTwin's detection pipeline works — from raw inputs to the Climate Stability Score.
-          Each engine is independently explainable; the cascade shows how they compose.
+          {"How PrithviTwin's detection pipeline works — from raw inputs to the Climate Stability Score."}
+          {" Each engine is independently explainable; the cascade shows how they compose."}
         </p>
       </div>
 
