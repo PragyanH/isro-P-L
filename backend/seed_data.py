@@ -1,0 +1,41 @@
+"""Seed data for PrithviTwin backend."""
+
+KARNATAKA_DISTRICTS = [
+    {"name": "Bengaluru Urban",  "baselineRainfall": 85,  "baselineTemp": 28.5, "rainfallStdDev": 30, "tempStdDev": 1.5, "floodRiskBase": 0.15, "droughtRiskBase": 0.20, "activeMonsoonDays": 12, "breakMonsoonDays": 8,  "predictionConfidence": 0.88},
+    {"name": "Bengaluru Rural",  "baselineRainfall": 78,  "baselineTemp": 27.8, "rainfallStdDev": 28, "tempStdDev": 1.4, "floodRiskBase": 0.10, "droughtRiskBase": 0.25, "activeMonsoonDays": 11, "breakMonsoonDays": 9,  "predictionConfidence": 0.85},
+    {"name": "Mysuru",           "baselineRainfall": 72,  "baselineTemp": 27.2, "rainfallStdDev": 25, "tempStdDev": 1.3, "floodRiskBase": 0.12, "droughtRiskBase": 0.28, "activeMonsoonDays": 10, "breakMonsoonDays": 10, "predictionConfidence": 0.82},
+    {"name": "Dharwad",          "baselineRainfall": 92,  "baselineTemp": 29.1, "rainfallStdDev": 32, "tempStdDev": 1.6, "floodRiskBase": 0.20, "droughtRiskBase": 0.18, "activeMonsoonDays": 14, "breakMonsoonDays": 7,  "predictionConfidence": 0.80},
+    {"name": "Belagavi",         "baselineRainfall": 105, "baselineTemp": 28.0, "rainfallStdDev": 38, "tempStdDev": 1.5, "floodRiskBase": 0.35, "droughtRiskBase": 0.12, "activeMonsoonDays": 16, "breakMonsoonDays": 6,  "predictionConfidence": 0.78},
+    {"name": "Kalaburagi",       "baselineRainfall": 52,  "baselineTemp": 31.5, "rainfallStdDev": 22, "tempStdDev": 2.0, "floodRiskBase": 0.08, "droughtRiskBase": 0.55, "activeMonsoonDays": 8,  "breakMonsoonDays": 14, "predictionConfidence": 0.76},
+    {"name": "Ballari",          "baselineRainfall": 48,  "baselineTemp": 32.2, "rainfallStdDev": 20, "tempStdDev": 2.1, "floodRiskBase": 0.05, "droughtRiskBase": 0.60, "activeMonsoonDays": 7,  "breakMonsoonDays": 15, "predictionConfidence": 0.75},
+    {"name": "Raichur",          "baselineRainfall": 46,  "baselineTemp": 33.0, "rainfallStdDev": 20, "tempStdDev": 2.2, "floodRiskBase": 0.06, "droughtRiskBase": 0.65, "activeMonsoonDays": 7,  "breakMonsoonDays": 16, "predictionConfidence": 0.74},
+    {"name": "Bidar",            "baselineRainfall": 60,  "baselineTemp": 30.5, "rainfallStdDev": 24, "tempStdDev": 1.8, "floodRiskBase": 0.10, "droughtRiskBase": 0.42, "activeMonsoonDays": 9,  "breakMonsoonDays": 12, "predictionConfidence": 0.77},
+    {"name": "Vijayapura",       "baselineRainfall": 50,  "baselineTemp": 31.8, "rainfallStdDev": 22, "tempStdDev": 2.0, "floodRiskBase": 0.07, "droughtRiskBase": 0.58, "activeMonsoonDays": 8,  "breakMonsoonDays": 14, "predictionConfidence": 0.75},
+    {"name": "Uttara Kannada",   "baselineRainfall": 280, "baselineTemp": 26.0, "rainfallStdDev": 80, "tempStdDev": 1.2, "floodRiskBase": 0.55, "droughtRiskBase": 0.05, "activeMonsoonDays": 20, "breakMonsoonDays": 4,  "predictionConfidence": 0.72},
+    {"name": "Dakshina Kannada", "baselineRainfall": 320, "baselineTemp": 27.5, "rainfallStdDev": 90, "tempStdDev": 1.1, "floodRiskBase": 0.60, "droughtRiskBase": 0.03, "activeMonsoonDays": 22, "breakMonsoonDays": 3,  "predictionConfidence": 0.70},
+    {"name": "Kodagu",           "baselineRainfall": 380, "baselineTemp": 22.0, "rainfallStdDev": 100,"tempStdDev": 1.0, "floodRiskBase": 0.72, "droughtRiskBase": 0.02, "activeMonsoonDays": 24, "breakMonsoonDays": 2,  "predictionConfidence": 0.68},
+    {"name": "Shivamogga",       "baselineRainfall": 180, "baselineTemp": 27.8, "rainfallStdDev": 55, "tempStdDev": 1.3, "floodRiskBase": 0.40, "droughtRiskBase": 0.08, "activeMonsoonDays": 17, "breakMonsoonDays": 5,  "predictionConfidence": 0.75},
+    {"name": "Hassan",           "baselineRainfall": 110, "baselineTemp": 27.0, "rainfallStdDev": 38, "tempStdDev": 1.3, "floodRiskBase": 0.25, "droughtRiskBase": 0.15, "activeMonsoonDays": 14, "breakMonsoonDays": 7,  "predictionConfidence": 0.78},
+    {"name": "Tumakuru",         "baselineRainfall": 70,  "baselineTemp": 28.8, "rainfallStdDev": 27, "tempStdDev": 1.4, "floodRiskBase": 0.12, "droughtRiskBase": 0.30, "activeMonsoonDays": 10, "breakMonsoonDays": 10, "predictionConfidence": 0.81},
+    {"name": "Davanagere",       "baselineRainfall": 75,  "baselineTemp": 29.8, "rainfallStdDev": 28, "tempStdDev": 1.6, "floodRiskBase": 0.16, "droughtRiskBase": 0.28, "activeMonsoonDays": 11, "breakMonsoonDays": 10, "predictionConfidence": 0.80},
+    {"name": "Chitradurga",      "baselineRainfall": 55,  "baselineTemp": 30.5, "rainfallStdDev": 22, "tempStdDev": 1.8, "floodRiskBase": 0.09, "droughtRiskBase": 0.48, "activeMonsoonDays": 8,  "breakMonsoonDays": 13, "predictionConfidence": 0.77},
+    {"name": "Mandya",           "baselineRainfall": 68,  "baselineTemp": 28.5, "rainfallStdDev": 26, "tempStdDev": 1.4, "floodRiskBase": 0.14, "droughtRiskBase": 0.32, "activeMonsoonDays": 10, "breakMonsoonDays": 11, "predictionConfidence": 0.80},
+    {"name": "Ramanagara",       "baselineRainfall": 72,  "baselineTemp": 28.0, "rainfallStdDev": 27, "tempStdDev": 1.3, "floodRiskBase": 0.13, "droughtRiskBase": 0.28, "activeMonsoonDays": 11, "breakMonsoonDays": 9,  "predictionConfidence": 0.82},
+]
+
+INDIA_STATE_SUMMARIES = [
+    {"name": "Andhra Pradesh",    "code": "AP", "stabilityScore": 62, "rainfall": 88,  "temp": 30.2, "primaryRisk": "Cyclone risk"},
+    {"name": "Assam",             "code": "AS", "stabilityScore": 55, "rainfall": 220, "temp": 26.0, "primaryRisk": "Flood"},
+    {"name": "Bihar",             "code": "BR", "stabilityScore": 49, "rainfall": 92,  "temp": 29.5, "primaryRisk": "Flood/Drought"},
+    {"name": "Gujarat",           "code": "GJ", "stabilityScore": 58, "rainfall": 55,  "temp": 32.0, "primaryRisk": "Drought"},
+    {"name": "Karnataka",         "code": "KA", "stabilityScore": 63, "rainfall": 95,  "temp": 28.5, "primaryRisk": "Mixed"},
+    {"name": "Kerala",            "code": "KL", "stabilityScore": 71, "rainfall": 290, "temp": 27.5, "primaryRisk": "Flood"},
+    {"name": "Maharashtra",       "code": "MH", "stabilityScore": 60, "rainfall": 90,  "temp": 29.8, "primaryRisk": "Mixed"},
+    {"name": "Odisha",            "code": "OD", "stabilityScore": 52, "rainfall": 120, "temp": 30.5, "primaryRisk": "Cyclone/Flood"},
+    {"name": "Rajasthan",         "code": "RJ", "stabilityScore": 38, "rainfall": 28,  "temp": 35.5, "primaryRisk": "Critical drought"},
+    {"name": "Tamil Nadu",        "code": "TN", "stabilityScore": 65, "rainfall": 78,  "temp": 30.8, "primaryRisk": "Drought/Cyclone"},
+    {"name": "Telangana",         "code": "TS", "stabilityScore": 61, "rainfall": 72,  "temp": 31.2, "primaryRisk": "Drought"},
+    {"name": "Uttar Pradesh",     "code": "UP", "stabilityScore": 55, "rainfall": 62,  "temp": 30.5, "primaryRisk": "Flood/Drought"},
+    {"name": "West Bengal",       "code": "WB", "stabilityScore": 54, "rainfall": 155, "temp": 29.0, "primaryRisk": "Flood/Cyclone"},
+    {"name": "Delhi",             "code": "DL", "stabilityScore": 45, "rainfall": 42,  "temp": 32.5, "primaryRisk": "Heatwave/Drought"},
+]
