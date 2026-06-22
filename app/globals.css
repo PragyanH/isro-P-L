@@ -49,6 +49,10 @@ html, body {
   scroll-behavior: smooth;
 }
 
+main {
+  padding-top: 56px;
+}
+
 /* Numbers/data always monospace */
 .num, [data-num], .font-mono {
   font-family: 'JetBrains Mono', 'IBM Plex Mono', monospace !important;

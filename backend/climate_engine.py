@@ -3,19 +3,18 @@ climate_engine.py
 Python port of lib/climateEngine.ts
 Single source of truth for server-side recompute validation.
 """
-import math
-from typing import Literal
 
+from typing import Literal
 
 SoilMoisture = Literal["Low", "Medium", "High"]
 
 WEIGHTS = {
     "rainfallAnomaly": 0.25,
-    "tempAnomaly":     0.15,
-    "floodRisk":       0.20,
-    "droughtRisk":     0.20,
-    "monsoonSpell":    0.12,
-    "confidence":      0.08,
+    "tempAnomaly": 0.15,
+    "floodRisk": 0.20,
+    "droughtRisk": 0.20,
+    "monsoonSpell": 0.12,
+    "confidence": 0.08,
 }
 
 
@@ -38,8 +37,13 @@ def compute_monsoon_spell_status(
     """SHARED FUNCTION — do not reimplement elsewhere."""
     total = active_days + break_days
     if total == 0:
-        return {"phase": "Normal", "activeStreakDays": 0, "breakStreakDays": 0,
-                "deviation": 0, "label": "Normal — no significant spell"}
+        return {
+            "phase": "Normal",
+            "activeStreakDays": 0,
+            "breakStreakDays": 0,
+            "deviation": 0,
+            "label": "Normal — no significant spell",
+        }
 
     active_ratio = active_days / max(total, 1)
     deviation = active_days - climatological_active_mean
@@ -102,25 +106,28 @@ def compute_stability_score(
     confidence: float,
 ) -> dict:
     rainfall_penalty = min(abs(rainfall_anomaly_z) / 3, 1.0)
-    temp_penalty     = min(abs(temp_anomaly_z) / 3, 1.0)
+    temp_penalty = min(abs(temp_anomaly_z) / 3, 1.0)
 
     phase = monsoon_spell["phase"]
     deviation = monsoon_spell.get("deviation", 0)
     monsoon_penalty = (
-        0.7 if phase == "Break"
-        else 0.5 if (phase == "Active" and deviation > 5)
-        else 0.35 if phase == "Transition"
-        else 0.1
+        0.7
+        if phase == "Break"
+        else (
+            0.5
+            if (phase == "Active" and deviation > 5)
+            else 0.35 if phase == "Transition" else 0.1
+        )
     )
 
     confidence_bonus = confidence * 0.8
 
     instability = (
-        WEIGHTS["rainfallAnomaly"] * rainfall_penalty +
-        WEIGHTS["tempAnomaly"]     * temp_penalty +
-        WEIGHTS["floodRisk"]       * flood_risk_index +
-        WEIGHTS["droughtRisk"]     * drought_risk_index +
-        WEIGHTS["monsoonSpell"]    * monsoon_penalty
+        WEIGHTS["rainfallAnomaly"] * rainfall_penalty
+        + WEIGHTS["tempAnomaly"] * temp_penalty
+        + WEIGHTS["floodRisk"] * flood_risk_index
+        + WEIGHTS["droughtRisk"] * drought_risk_index
+        + WEIGHTS["monsoonSpell"] * monsoon_penalty
     )
 
     raw_score = (1 - instability) * 100 + WEIGHTS["confidence"] * confidence_bonus * 10
@@ -129,57 +136,96 @@ def compute_stability_score(
     return {
         "score": score,
         "components": {
-            "rainfallContribution": round(WEIGHTS["rainfallAnomaly"] * rainfall_penalty * 100),
-            "tempContribution":     round(WEIGHTS["tempAnomaly"] * temp_penalty * 100),
-            "floodContribution":    round(WEIGHTS["floodRisk"] * flood_risk_index * 100),
-            "droughtContribution":  round(WEIGHTS["droughtRisk"] * drought_risk_index * 100),
-            "monsoonContribution":  round(WEIGHTS["monsoonSpell"] * monsoon_penalty * 100),
-            "confidenceContribution": round(WEIGHTS["confidence"] * confidence_bonus * 10),
+            "rainfallContribution": round(
+                WEIGHTS["rainfallAnomaly"] * rainfall_penalty * 100
+            ),
+            "tempContribution": round(WEIGHTS["tempAnomaly"] * temp_penalty * 100),
+            "floodContribution": round(WEIGHTS["floodRisk"] * flood_risk_index * 100),
+            "droughtContribution": round(
+                WEIGHTS["droughtRisk"] * drought_risk_index * 100
+            ),
+            "monsoonContribution": round(
+                WEIGHTS["monsoonSpell"] * monsoon_penalty * 100
+            ),
+            "confidenceContribution": round(
+                WEIGHTS["confidence"] * confidence_bonus * 10
+            ),
         },
     }
 
 
 def get_score_band(score: int) -> dict:
-    if score >= 80: return {"band": "Stable",        "hex": "#00E5FF"}
-    if score >= 60: return {"band": "Moderate",      "hex": "#FFD23F"}
-    if score >= 40: return {"band": "Elevated Risk", "hex": "#FF6B35"}
-    return              {"band": "Critical",        "hex": "#FF3366"}
+    if score >= 80:
+        return {"band": "Stable", "hex": "#00E5FF"}
+    if score >= 60:
+        return {"band": "Moderate", "hex": "#FFD23F"}
+    if score >= 40:
+        return {"band": "Elevated Risk", "hex": "#FF6B35"}
+    return {"band": "Critical", "hex": "#FF3366"}
 
 
 def get_advisory_tier(score: int) -> str:
-    if score >= 80: return "Normal"
-    if score >= 65: return "Watch"
-    if score >= 50: return "Advisory"
-    if score >= 35: return "Alert"
+    if score >= 80:
+        return "Normal"
+    if score >= 65:
+        return "Watch"
+    if score >= 50:
+        return "Advisory"
+    if score >= 35:
+        return "Alert"
     return "Critical"
 
 
 def compute_whatif(baseline: dict, overrides: dict) -> dict:
     rainfall = baseline["baselineRainfall"] * (1 + overrides["rainfallPctChange"] / 100)
-    temp     = baseline["baselineTemp"] + overrides["tempOffset"]
+    temp = baseline["baselineTemp"] + overrides["tempOffset"]
 
     rain_z = z_score(rainfall, baseline["baselineRainfall"], baseline["rainfallStdDev"])
     temp_z = z_score(temp, baseline["baselineTemp"], baseline["tempStdDev"])
-    spi    = compute_spi(rainfall, baseline["baselineRainfall"], baseline["rainfallStdDev"])
+    spi = compute_spi(
+        rainfall, baseline["baselineRainfall"], baseline["rainfallStdDev"]
+    )
 
-    flood_risk  = compute_flood_risk_index(rain_z, overrides["monsoonActiveDays"], overrides["soilMoisture"], baseline["floodRiskBase"])
-    drought_risk = compute_drought_risk_index(spi, overrides["consecutiveDryDays"], overrides["soilMoisture"], baseline["droughtRiskBase"])
-    spell       = compute_monsoon_spell_status(overrides["monsoonActiveDays"], overrides["monsoonBreakDays"], baseline["activeMonsoonDays"], baseline["breakMonsoonDays"])
+    flood_risk = compute_flood_risk_index(
+        rain_z,
+        overrides["monsoonActiveDays"],
+        overrides["soilMoisture"],
+        baseline["floodRiskBase"],
+    )
+    drought_risk = compute_drought_risk_index(
+        spi,
+        overrides["consecutiveDryDays"],
+        overrides["soilMoisture"],
+        baseline["droughtRiskBase"],
+    )
+    spell = compute_monsoon_spell_status(
+        overrides["monsoonActiveDays"],
+        overrides["monsoonBreakDays"],
+        baseline["activeMonsoonDays"],
+        baseline["breakMonsoonDays"],
+    )
 
-    score_data  = compute_stability_score(rain_z, temp_z, flood_risk, drought_risk, spell, baseline["predictionConfidence"])
-    score       = score_data["score"]
+    score_data = compute_stability_score(
+        rain_z,
+        temp_z,
+        flood_risk,
+        drought_risk,
+        spell,
+        baseline["predictionConfidence"],
+    )
+    score = score_data["score"]
 
     return {
-        "rainfall":          round(rainfall, 2),
-        "temp":              round(temp, 2),
-        "rainfallAnomalyZ":  round(rain_z, 3),
-        "tempAnomalyZ":      round(temp_z, 3),
-        "spi":               round(spi, 3),
-        "floodRiskIndex":    round(flood_risk, 3),
-        "droughtRiskIndex":  round(drought_risk, 3),
+        "rainfall": round(rainfall, 2),
+        "temp": round(temp, 2),
+        "rainfallAnomalyZ": round(rain_z, 3),
+        "tempAnomalyZ": round(temp_z, 3),
+        "spi": round(spi, 3),
+        "floodRiskIndex": round(flood_risk, 3),
+        "droughtRiskIndex": round(drought_risk, 3),
         "monsoonSpellStatus": spell,
-        "stabilityScore":    score,
-        "scoreBand":         get_score_band(score)["band"],
-        "scoreComponents":   score_data["components"],
-        "advisoryTier":      get_advisory_tier(score),
+        "stabilityScore": score,
+        "scoreBand": get_score_band(score)["band"],
+        "scoreComponents": score_data["components"],
+        "advisoryTier": get_advisory_tier(score),
     }

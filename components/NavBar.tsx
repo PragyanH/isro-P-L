@@ -15,7 +15,7 @@ export default function NavBar() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 glass-panel rounded-none border-x-0 border-t-0 border-b border-white/8">
-      <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between relative">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
           <div className="w-6 h-6 relative">
@@ -34,8 +34,8 @@ export default function NavBar() {
           </span>
         </Link>
 
-        {/* Nav links */}
-        <div className="flex items-center gap-1">
+        {/* Nav links (centered) */}
+        <div className="flex items-center gap-1 absolute left-1/2 transform -translate-x-1/2">
           {NAV_ITEMS.map(item => {
             const isActive = item.href === '/'
               ? pathname === '/'
@@ -58,10 +58,10 @@ export default function NavBar() {
           })}
         </div>
 
-        {/* Status indicator */}
-        <div className="hidden sm:flex items-center gap-2">
+        {/* Status indicator (right-aligned) */}
+        <div className="hidden sm:flex items-center gap-2 ml-auto">
           <div className="w-1.5 h-1.5 rounded-full bg-signal-cyan animate-pulse" />
-          <span className="text-[10px] font-mono text-text-dim">LIVE TWIN ACTIVE</span>
+          <span className="text-[11px] font-mono text-text-dim">LIVE TWIN ACTIVE</span>
         </div>
       </div>
     </nav>

@@ -1,4 +1,5 @@
 """FastAPI backend for PrithviTwin — serves seed district data + recompute endpoints."""
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -23,8 +24,8 @@ app.add_middleware(
 
 class RecomputeRequest(BaseModel):
     baseline_name: str
-    rainfall_pct_change: float = 0.0     # -80 to +150
-    temp_offset: float = 0.0              # -3 to +5
+    rainfall_pct_change: float = 0.0  # -80 to +150
+    temp_offset: float = 0.0  # -3 to +5
     consecutive_dry_days: int = 0
     soil_moisture: Literal["Low", "Medium", "High"] = "Medium"
     monsoon_active_days: int | None = None
@@ -63,19 +64,33 @@ def get_india_states():
 def recompute(req: RecomputeRequest):
     """Accepts baseline + overrides, returns full recomputed climate state."""
     baseline = next(
-        (d for d in KARNATAKA_DISTRICTS if str(d["name"]).lower() == req.baseline_name.lower()),
+        (
+            d
+            for d in KARNATAKA_DISTRICTS
+            if str(d["name"]).lower() == req.baseline_name.lower()
+        ),
         None,
     )
     if baseline is None:
-        raise HTTPException(status_code=404, detail=f"Baseline district '{req.baseline_name}' not found")
+        raise HTTPException(
+            status_code=404, detail=f"Baseline district '{req.baseline_name}' not found"
+        )
 
     overrides = {
-        "rainfallPctChange":  req.rainfall_pct_change,
-        "tempOffset":         req.temp_offset,
+        "rainfallPctChange": req.rainfall_pct_change,
+        "tempOffset": req.temp_offset,
         "consecutiveDryDays": req.consecutive_dry_days,
-        "soilMoisture":       req.soil_moisture,
-        "monsoonActiveDays":  req.monsoon_active_days if req.monsoon_active_days is not None else baseline["activeMonsoonDays"],
-        "monsoonBreakDays":   req.monsoon_break_days  if req.monsoon_break_days  is not None else baseline["breakMonsoonDays"],
-        "compoundMode":       req.compound_mode,
+        "soilMoisture": req.soil_moisture,
+        "monsoonActiveDays": (
+            req.monsoon_active_days
+            if req.monsoon_active_days is not None
+            else baseline["activeMonsoonDays"]
+        ),
+        "monsoonBreakDays": (
+            req.monsoon_break_days
+            if req.monsoon_break_days is not None
+            else baseline["breakMonsoonDays"]
+        ),
+        "compoundMode": req.compound_mode,
     }
     return compute_whatif(baseline, overrides)

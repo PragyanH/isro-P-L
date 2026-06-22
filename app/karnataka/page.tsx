@@ -72,18 +72,18 @@ export default function KarnatakaPage() {
   }, [simBaseline, incidentOverrides]);
 
   return (
-    <div className={`min-h-screen ${ready ? 'animate-systems-online' : 'opacity-0'}`}>
+    <div className={`min-h-screen w-full ${ready ? 'animate-systems-online' : 'opacity-0'}`}>
 
       {/* ── Page header ──────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-4 pt-6 pb-4">
+      <div className="w-full px-6 pt-6 pb-4">
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[10px] font-mono text-text-dim uppercase tracking-widest">Section 2 · Case Study</span>
               <span className="text-[10px] font-mono text-signal-cyan">/ Karnataka</span>
             </div>
-            <h1 className="font-display font-bold text-white text-2xl">Karnataka Proof of Concept</h1>
-            <p className="text-text-dim text-sm mt-1">District-level digital twin with historical incident validation</p>
+            <h1 className="font-display font-bold text-white text-3xl">Karnataka Proof of Concept</h1>
+            <p className="text-text-dim text-base mt-1">District-level digital twin with historical incident validation</p>
           </div>
 
           {/* Incident card */}
@@ -136,13 +136,13 @@ export default function KarnatakaPage() {
       </div>
 
       {/* ── Main content ─────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-4 pb-8">
+      <div className="w-full px-6 pb-8">
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
           {/* Map column */}
           <div className="xl:col-span-2">
             <GlassPanel padding="p-0" className="overflow-hidden">
-              <div className="h-[480px] relative">
+              <div className="h-[640px] md:h-[720px] relative">
                 <ComposableMap
                   projection="geoMercator"
                   projectionConfig={{ center: [76.15, 14.85], scale: 4200 }}

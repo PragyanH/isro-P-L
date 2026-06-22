@@ -35,6 +35,8 @@
     "typescript": "^6.0.3"
   },
   "devDependencies": {
-    "@types/react-simple-maps": "^3.0.6"
+    "@types/react-simple-maps": "^3.0.6",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.35"
   }
 }

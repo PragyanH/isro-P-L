@@ -25,12 +25,12 @@ const SPELL_CONTRIBUTION = [
 
 export default function ResearchPage() {
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
+    <div className="w-full px-6 py-10">
 
       {/* Header */}
       <div className="mb-8 animate-slide-up">
-        <div className="text-[10px] font-mono text-text-dim uppercase tracking-widest mb-1">Section 4 · Research Foundation</div>
-        <h1 className="font-display font-bold text-white text-3xl mb-2">Research Integration</h1>
+        <div className="text-[11px] font-mono text-text-dim uppercase tracking-widest mb-1">Section 4 · Research Foundation</div>
+        <h1 className="font-display font-bold text-white text-4xl mb-3">Research Integration</h1>
         <p className="text-text-dim max-w-2xl">
           The Monsoon Spell Tracker is grounded in peer-reviewed science. This page documents the research basis
           and shows how it propagates through the entire PrithviTwin system.
@@ -85,10 +85,10 @@ export default function ResearchPage() {
           },
         ].map(item => (
           <GlassPanel key={item.label} className="animate-slide-up delay-200 text-center">
-            <div className="text-3xl mb-1" style={{ color: item.color }}>{item.icon}</div>
-            <div className="font-mono text-2xl font-bold mb-1" style={{ color: item.color }}>{item.stat}</div>
-            <div className="font-semibold text-white text-sm mb-2">{item.label}</div>
-            <p className="text-xs text-text-dim leading-relaxed">{item.desc}</p>
+            <div className="text-4xl mb-1" style={{ color: item.color }}>{item.icon}</div>
+            <div className="font-mono text-3xl font-bold mb-1" style={{ color: item.color }}>{item.stat}</div>
+            <div className="font-semibold text-white text-lg mb-2">{item.label}</div>
+            <p className="text-sm text-text-dim leading-relaxed">{item.desc}</p>
           </GlassPanel>
         ))}
       </div>

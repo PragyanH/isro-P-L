@@ -80,13 +80,13 @@ export default function XAIPage() {
   } : null;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
+    <div className="w-full px-6 py-10">
 
       {/* Header */}
       <div className="mb-8 animate-slide-up">
-        <div className="text-[10px] font-mono text-text-dim uppercase tracking-widest mb-1">Section 3 · Explainability</div>
-        <h1 className="font-display font-bold text-white text-3xl mb-2">XAI / Methodology</h1>
-        <p className="text-text-dim max-w-2xl">
+        <div className="text-[11px] font-mono text-text-dim uppercase tracking-widest mb-1">Section 3 · Explainability</div>
+        <h1 className="font-display font-bold text-white text-4xl mb-3">XAI / Methodology</h1>
+        <p className="text-text-dim max-w-3xl text-base">
           {"How PrithviTwin's detection pipeline works — from raw inputs to the Climate Stability Score."}
           {" Each engine is independently explainable; the cascade shows how they compose."}
         </p>
@@ -101,10 +101,10 @@ export default function XAIPage() {
             glow={engine.isAI ? 'violet' : 'none'}
           >
             <div className="flex items-start gap-3 mb-3">
-              <span className="text-2xl">{engine.icon}</span>
+              <span className="text-3xl">{engine.icon}</span>
               <div className="flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="font-display font-bold text-white">{engine.name}</h2>
+                  <h2 className="font-display font-bold text-white text-lg">{engine.name}</h2>
                   <span
                     className="text-[10px] px-2 py-0.5 rounded-full font-mono font-semibold"
                     style={{ color: engine.color, background: engine.color + '15', border: `1px solid ${engine.color}30` }}
@@ -117,7 +117,7 @@ export default function XAIPage() {
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-white/70 mt-1 leading-relaxed">{engine.description}</p>
+                <p className="text-sm text-white/70 mt-1 leading-relaxed">{engine.description}</p>
               </div>
             </div>
             <div className="bg-white/[0.02] rounded-lg p-3 border border-white/5">
