@@ -1,0 +1,574 @@
+<files>
+This section contains the contents of the repository's files.
+
+<file path="backend/README.md">
+# PrithviTwin Backend
+
+FastAPI backend serving seed district data and recompute endpoints.
+
+## Setup & Run
+
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload --port 8000
+```
+
+## Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/` | Health check |
+| GET | `/districts/karnataka` | All Karnataka district baselines |
+| GET | `/districts/karnataka/{name}` | Single district baseline |
+| GET | `/states/india` | India state-level summaries |
+| POST | `/recompute` | Parametric recompute from baseline + overrides |
+
+## Recompute Example
+
+```bash
+curl -X POST http://localhost:8000/recompute \
+  -H "Content-Type: application/json" \
+  -d '{
+    "baseline_name": "Belagavi",
+    "rainfall_pct_change": 167,
+    "temp_offset": -1.5,
+    "consecutive_dry_days": 2,
+    "soil_moisture": "High",
+    "monsoon_active_days": 18,
+    "monsoon_break_days": 2,
+    "compound_mode": true
+  }'
+```
+
+## Interactive Docs
+Visit [http://localhost:8000/docs](http://localhost:8000/docs) for Swagger UI.
+</file>
+
+<file path="components/ForensicReport.tsx">
+import { useEffect } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import type { ClimateState } from '@/lib/climateEngine';
+import { getScoreBand } from '@/lib/climateEngine';
+⋮----
+interface ForensicReportProps {
+  state: ClimateState;
+  districtName: string;
+  incidentName?: string;
+  onClose: () => void;
+}
+</file>
+
+<file path="components/GlassPanel.tsx">
+import { ReactNode } from 'react';
+⋮----
+interface GlassPanelProps {
+  children: ReactNode;
+  className?: string;
+  glow?: 'none' | 'cyan' | 'amber' | 'red' | 'violet';
+  onClick?: () => void;
+  hover?: boolean;
+  padding?: string;
+}
+⋮----
+export default function GlassPanel({
+  children,
+  className = '',
+  glow = 'none',
+  onClick,
+  hover = false,
+  padding = 'p-5',
+}: GlassPanelProps)
+</file>
+
+<file path="components/OrbitalRing.tsx">
+import { useEffect, useRef } from 'react';
+import { getScoreBand } from '@/lib/climateEngine';
+⋮----
+interface OrbitalRingProps {
+  score: number;
+  size?: 'sm' | 'md' | 'lg';
+  animated?: boolean;
+  showLabel?: boolean;
+}
+⋮----
+{/* Outer decorative orbit */}
+⋮----
+{/* Background track */}
+⋮----
+{/* Score arc */}
+</file>
+
+<file path="components/ScoreBreakdown.tsx">
+import { useState } from 'react';
+import type { ScoreComponents } from '@/lib/climateEngine';
+⋮----
+interface ScoreBreakdownProps {
+  components: ScoreComponents;
+  score: number;
+}
+</file>
+
+<file path="components/WhatIfSimulator.tsx">
+import { useState, useCallback } from 'react';
+import GlassPanel from './GlassPanel';
+import OrbitalRing from './OrbitalRing';
+import ScoreBreakdown from './ScoreBreakdown';
+import { computeWhatIf, defaultOverrides, getScoreBand, getAdvisoryTier } from '@/lib/climateEngine';
+import type { DistrictBaseline, WhatIfOverrides, ClimateState } from '@/lib/climateEngine';
+⋮----
+interface WhatIfSimulatorProps {
+  baseline: DistrictBaseline;
+  initialOverrides?: Partial<WhatIfOverrides>;
+  title?: string;
+}
+⋮----
+const reset = () =>
+⋮----
+{/* Temperature */}
+⋮----
+{/* Consecutive Dry Days */}
+⋮----
+{/* Soil Moisture */}
+</file>
+
+<file path="lib/climateEngine.ts">
+export interface DistrictBaseline {
+  name: string;
+  baselineRainfall: number;
+  baselineTemp: number;
+  rainfallStdDev: number;
+  tempStdDev: number;
+  floodRiskBase: number;
+  droughtRiskBase: number;
+  activeMonsoonDays: number;
+  breakMonsoonDays: number;
+  predictionConfidence: number;
+}
+⋮----
+export interface WhatIfOverrides {
+  rainfallPctChange: number;
+  tempOffset: number;
+  consecutiveDryDays: number;
+  soilMoisture: 'Low' | 'Medium' | 'High';
+  monsoonActiveDays: number;
+  monsoonBreakDays: number;
+  compoundMode: boolean;
+}
+⋮----
+export interface ClimateState {
+  rainfall: number;
+  temp: number;
+  rainfallAnomalyZ: number;
+  tempAnomalyZ: number;
+  spi: number;
+  floodRiskIndex: number;
+  droughtRiskIndex: number;
+  monsoonSpellStatus: MonsoonSpellStatus;
+  stabilityScore: number;
+  scoreBand: ScoreBand;
+  scoreComponents: ScoreComponents;
+  advisoryTier: AdvisoryTier;
+}
+⋮----
+export interface ScoreComponents {
+  rainfallContribution: number;
+  tempContribution: number;
+  floodContribution: number;
+  droughtContribution: number;
+  monsoonContribution: number;
+  confidenceContribution: number;
+}
+⋮----
+export interface MonsoonSpellStatus {
+  phase: 'Active' | 'Break' | 'Transition' | 'Normal';
+  activeStreakDays: number;
+  breakStreakDays: number;
+  deviation: number;
+  label: string;
+}
+⋮----
+export type ScoreBand = 'Stable' | 'Moderate' | 'Elevated Risk' | 'Critical';
+export type AdvisoryTier = 'Normal' | 'Watch' | 'Advisory' | 'Alert' | 'Critical';
+⋮----
+export function computeMonsoonSpellStatus(
+  activeDays: number,
+  breakDays: number,
+  climatologicalActiveMean = 12,
+  climatologicalBreakMean = 8
+): MonsoonSpellStatus
+⋮----
+function zScore(value: number, mean: number, stdDev: number): number
+⋮----
+export function computeSPI(rainfall: number, baseline: number, stdDev: number): number
+⋮----
+export function computeFloodRiskIndex(
+  rainfallAnomalyZ: number,
+  activeMonsoonDays: number,
+  soilMoisture: 'Low' | 'Medium' | 'High',
+  baseFloodRisk: number
+): number
+⋮----
+export function computeDroughtRiskIndex(
+  spi: number,
+  consecutiveDryDays: number,
+  soilMoisture: 'Low' | 'Medium' | 'High',
+  baseDroughtRisk: number
+): number
+⋮----
+export function computeStabilityScore(
+  rainfallAnomalyZ: number,
+  tempAnomalyZ: number,
+  floodRiskIndex: number,
+  droughtRiskIndex: number,
+  monsoonSpell: MonsoonSpellStatus,
+  confidence: number
+):
+⋮----
+export function getScoreBand(score: number):
+⋮----
+export function getAdvisoryTier(score: number): AdvisoryTier
+⋮----
+export function computeWhatIf(
+  baseline: DistrictBaseline,
+  overrides: WhatIfOverrides
+): ClimateState
+⋮----
+export function defaultOverrides(baseline: DistrictBaseline): WhatIfOverrides
+</file>
+
+<file path="lib/seedData.ts">
+import type { DistrictBaseline } from './climateEngine';
+⋮----
+export interface StateSummary {
+  name: string;
+  code: string;
+  stabilityScore: number;
+  rainfall: number;
+  temp: number;
+  primaryRisk: string;
+}
+</file>
+
+<file path="next.config.js">
+
+</file>
+
+<file path="postcss.config.js">
+
+</file>
+
+<file path="README.md">
+# 🛰️ PrithviTwin
+### AI-Powered Climate Digital Twin & Explainable Decision-Support System
+**PS5 — Bharatiya Antariksh Hackathon 2026 | ISRO**
+
+---
+
+## 📌 Project Overview
+PrithviTwin is a district-level interactive decision-support system built using IMD and ISRO satellite data to simulate and visualize climate stability across India, with a deep-dive pilot region for **Karnataka**. 
+
+It uses real-time parametric what-if simulation to recompute Climate Stability Scores (0–100) dynamically using z-scores, Standardised Precipitation Index (SPI) proxies, flood/drought risk projections, and monsoon spell classifications based on evolution patterns.
+
+---
+
+## 🎨 Core Features
+
+1. **🌏 National Climate Index Map (India Home)**
+   * interactive India map showing state-level stability summaries.
+   * Color-coded score bands (Stable, Moderate, Elevated, Critical) with a satellite mission-control HUD overlay.
+
+2. **📍 Karnataka District Twin (Karnataka PoC)**
+   * High-resolution, actual district-boundary mapping with interactive pan/zoom.
+   * **Monsoon Spell Tracker**: Evaluates active/break monsoon spell durations based on climatological averages.
+   * **What-If Simulator**: Allows overrides of Rainfall (%), Temperature offset (°C), Dry days, Soil moisture, and active/break spells.
+   * **Forensic Report**: Generates structured, evidence-based reports validating the model against the historic **2019 North Karnataka Floods (Belagavi)**.
+
+3. **🧠 Explainable AI (XAI) & Methodology**
+   * Clear visual flows explaining the pipeline: Input Overrides ➡️ Engine (LSTM spell model, Isolation Forest, JSD shift) ➡️ Score.
+
+4. **📄 Research Paper Integration**
+   * Visualizes long-term summer monsoon spell changes citing *Subrahmanyam, K.V. et al. (2023)* showing active spell compression and break spell expansion.
+
+---
+
+## 🛠️ Technology Stack
+
+| Layer | Technology | Description |
+|---|---|---|
+| **Frontend** | **Next.js 14** (App Router) + **Tailwind CSS** | Static single-page application router, styled with deep-space navy telemetry design tokens. |
+| **Mapping** | **react-simple-maps** (D3-geo / TopoJSON) | Client-side map rendering using local high-resolution state/district boundary GeoJSON files. |
+| **Charts** | **Recharts** | Interactive timeline spell-line graphs. |
+| **Backend** | **Python (FastAPI)** | Serves seed district tables + recompute JSON endpoints matching frontend mathematical engines. |
+
+---
+
+## 🚀 How to Run Locally
+
+### 🖥️ Frontend (Next.js)
+
+1. Navigate to the root directory:
+   ```bash
+   cd /Users/pradyumnakh/ISRO
+   ```
+2. Install npm dependencies:
+   ```bash
+   npm install
+   ```
+3. Run the Next.js development server:
+   ```bash
+   npm run dev
+   ```
+4. Access the web app at **[http://localhost:3000](http://localhost:3000)**.
+
+---
+
+### ⚙️ Backend API (FastAPI)
+
+1. Navigate to the backend directory:
+   ```bash
+   cd /Users/pradyumnakh/ISRO/backend
+   ```
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Run the FastAPI server:
+   ```bash
+   python3 -m uvicorn main:app --port 8000 --reload
+   ```
+4. View the Swagger API documentation at **[http://localhost:8000/docs](http://localhost:8000/docs)**.
+
+---
+
+## 📂 Project Structure
+
+```
+/Users/pradyumnakh/ISRO/
+│
+├── app/                  # Next.js App Router routes
+│   ├── page.tsx          # India Map (Home)
+│   ├── karnataka/        # Karnataka PoC Deep Dive
+│   ├── xai/              # XAI Engine Explanations
+│   └── research/         # Research Paper Citations
+│
+├── components/           # Reusable UI component modules
+│   ├── GlassPanel.tsx    # Backdrop-blur container panels
+│   ├── OrbitalRing.tsx   # Score visualization ring
+│   ├── WhatIfSimulator.tsx # Parametric overrides panel
+│   └── ForensicReport.tsx # Historic validation document modal
+│
+├── public/               # Local boundary datasets
+│   ├── india-states.geojson
+│   └── karnataka-districts.geojson
+│
+└── backend/              # FastAPI Python backend
+    ├── main.py           # API endpoints
+    ├── climate_engine.py # Python math port matching frontend
+    └── seed_data.py      # Synced district/state lists
+```
+</file>
+
+<file path="tailwind.config.js">
+
+</file>
+
+<file path="types/global.d.ts">
+
+</file>
+
+<file path="app/layout.tsx">
+import type { Metadata } from 'next';
+⋮----
+import NavBar from '@/components/NavBar';
+⋮----
+export default function RootLayout(
+</file>
+
+<file path="app/page.tsx">
+import { useState, useEffect, useMemo } from 'react';
+import { ComposableMap, Geographies, Geography, ZoomableGroup } from 'react-simple-maps';
+import { useRouter } from 'next/navigation';
+import GlassPanel from '@/components/GlassPanel';
+import OrbitalRing from '@/components/OrbitalRing';
+import WhatIfSimulator from '@/components/WhatIfSimulator';
+import { indiaStateSummaries, karnatakaDistricts } from '@/lib/seedData';
+import { getScoreBand } from '@/lib/climateEngine';
+⋮----
+interface TooltipState {
+  x: number; y: number;
+  name: string; score: number; risk: string; rainfall: number; temp: number;
+}
+⋮----
+export default function HomePage()
+⋮----
+const getStateData = (geoProps: Record<string, string>) =>
+⋮----
+const getColor = (score: number | undefined): string =>
+⋮----
+onClick=
+</file>
+
+<file path="app/research/page.tsx">
+import GlassPanel from '@/components/GlassPanel';
+import {
+  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  BarChart, Bar, CartesianGrid,
+} from 'recharts';
+</file>
+
+<file path="backend/climate_engine.py">
+SoilMoisture = Literal["Low", "Medium", "High"]
+⋮----
+WEIGHTS = {
+⋮----
+def z_score(value: float, mean: float, std_dev: float) -> float
+⋮----
+def compute_spi(rainfall: float, baseline: float, std_dev: float) -> float
+⋮----
+total = active_days + break_days
+⋮----
+active_ratio = active_days / max(total, 1)
+deviation = active_days - climatological_active_mean
+⋮----
+phase = "Break"
+label = f"Break spell — {break_days}d dry (climatological mean: {int(climatological_break_mean)}d)"
+⋮----
+phase = "Active"
+label = f"Active spell — {active_days}d wet (climatological mean: {int(climatological_active_mean)}d)"
+⋮----
+phase = "Transition"
+sign = "+" if deviation > 0 else ""
+label = f"Transitioning — {sign}{int(deviation)}d from mean"
+⋮----
+phase = "Normal"
+label = "Normal — within climatological bounds"
+⋮----
+soil_factor = {"High": 1.3, "Medium": 1.0, "Low": 0.7}[soil_moisture]
+monsoon_factor = min(active_monsoon_days / 10, 1.5)
+anomaly_factor = (1 + rainfall_anomaly_z * 0.3) if rainfall_anomaly_z > 0 else 1.0
+raw = base_flood_risk * anomaly_factor * soil_factor * monsoon_factor
+⋮----
+spi_penalty = min(abs(spi) * 0.25, 0.5) if spi < 0 else 0.0
+dry_day_factor = min(consecutive_dry_days / 15, 1.0)
+soil_factor = {"Low": 1.4, "Medium": 1.0, "High": 0.6}[soil_moisture]
+raw = (base_drought_risk + spi_penalty) * soil_factor * (1 + dry_day_factor * 0.4)
+⋮----
+rainfall_penalty = min(abs(rainfall_anomaly_z) / 3, 1.0)
+temp_penalty = min(abs(temp_anomaly_z) / 3, 1.0)
+⋮----
+phase = monsoon_spell["phase"]
+deviation = monsoon_spell.get("deviation", 0)
+monsoon_penalty = (
+⋮----
+confidence_bonus = confidence * 0.8
+⋮----
+instability = (
+⋮----
+raw_score = (1 - instability) * 100 + WEIGHTS["confidence"] * confidence_bonus * 10
+score = min(max(round(raw_score), 0), 100)
+⋮----
+def get_score_band(score: int) -> dict
+⋮----
+def get_advisory_tier(score: int) -> str
+⋮----
+def compute_whatif(baseline: dict, overrides: dict) -> dict
+⋮----
+rainfall = baseline["baselineRainfall"] * (1 + overrides["rainfallPctChange"] / 100)
+temp = baseline["baselineTemp"] + overrides["tempOffset"]
+⋮----
+rain_z = z_score(rainfall, baseline["baselineRainfall"], baseline["rainfallStdDev"])
+temp_z = z_score(temp, baseline["baselineTemp"], baseline["tempStdDev"])
+spi = compute_spi(
+⋮----
+flood_risk = compute_flood_risk_index(
+drought_risk = compute_drought_risk_index(
+spell = compute_monsoon_spell_status(
+⋮----
+score_data = compute_stability_score(
+score = score_data["score"]
+</file>
+
+<file path="components/NavBar.tsx">
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+</file>
+
+<file path="app/xai/page.tsx">
+import { useState } from 'react';
+import GlassPanel from '@/components/GlassPanel';
+import OrbitalRing from '@/components/OrbitalRing';
+import { computeMonsoonSpellStatus, computeStabilityScore, computeFloodRiskIndex, computeDroughtRiskIndex, computeSPI } from '@/lib/climateEngine';
+</file>
+
+<file path="backend/main.py">
+app = FastAPI(
+⋮----
+class RecomputeRequest(BaseModel)
+⋮----
+baseline_name: str
+rainfall_pct_change: float = 0.0
+temp_offset: float = 0.0
+consecutive_dry_days: int = 0
+soil_moisture: Literal["Low", "Medium", "High"] = "Medium"
+monsoon_active_days: int | None = None
+monsoon_break_days: int | None = None
+compound_mode: bool = False
+⋮----
+@app.get("/")
+def root()
+⋮----
+@app.get("/districts/karnataka")
+def get_karnataka_districts()
+⋮----
+@app.get("/districts/karnataka/{name}")
+def get_district(name: str)
+⋮----
+name_lower = name.lower().replace("-", " ")
+⋮----
+@app.get("/states/india")
+def get_india_states()
+⋮----
+@app.post("/recompute")
+def recompute(req: RecomputeRequest)
+⋮----
+baseline = next(
+⋮----
+overrides = {
+</file>
+
+<file path="backend/seed_data.py">
+KARNATAKA_DISTRICTS = [
+⋮----
+INDIA_STATE_SUMMARIES = [
+⋮----
+KARNATAKA_INCIDENT = {
+</file>
+
+<file path="app/karnataka/page.tsx">
+import { useState, useEffect, useMemo } from 'react';
+import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from 'react-simple-maps';
+import GlassPanel from '@/components/GlassPanel';
+import OrbitalRing from '@/components/OrbitalRing';
+import WhatIfSimulator from '@/components/WhatIfSimulator';
+import ForensicReport from '@/components/ForensicReport';
+import ScoreBreakdown from '@/components/ScoreBreakdown';
+import { karnatakaDistricts, karnatakaIncident } from '@/lib/seedData';
+import { computeWhatIf, defaultOverrides, getScoreBand } from '@/lib/climateEngine';
+⋮----
+const getDistrict = (geoProps: Record<string, string>) =>
+⋮----
+const getStateForDistrict = (d: typeof karnatakaDistricts[0]) =>
+⋮----
+const handleStartSimulation = () =>
+⋮----
+onClick=
+⋮----
+if (hoveredDistrict)
+⋮----
+<GlassPanel glow=
+⋮----
+<button onClick=
+</file>
+
+</files>

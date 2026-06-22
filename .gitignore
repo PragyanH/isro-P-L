@@ -12,3 +12,10 @@ backend/.venv/
 dist/
 .vercel/
 scratch/
+.venv/
+venv/
+.vscode/
+*.log
+*.bak
+.repomix-under4500.xml
+
