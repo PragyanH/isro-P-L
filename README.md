@@ -106,3 +106,30 @@ It uses real-time parametric what-if simulation to recompute Climate Stability S
     ├── climate_engine.py # Python math port matching frontend
     └── seed_data.py      # Synced district/state lists
 ```
+
+---
+
+## ⚠️ Troubleshooting & Setup for Team Members
+
+If your local environment has missing files, empty folders, or server errors, please follow these steps:
+
+### 1. Ensure you are on the correct Git branch
+The active project files are stored on the `pradyumnakh` branch. The `Pragyan` branch contains a broken submodule reference. Switch to the correct branch:
+```bash
+git fetch --all
+git checkout pradyumnakh
+git pull origin pradyumnakh
+```
+
+### 2. Update local node modules
+If you see missing dependencies or `MODULE_NOT_FOUND` errors, update your modules:
+```bash
+npm install
+```
+
+### 3. Clear Next.js cache and restart
+If the Next.js development server throws Webpack runtime errors or fails to refresh pages, clear the build cache and restart:
+```bash
+rm -rf .next
+npm run dev
+```
